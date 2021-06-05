@@ -171,7 +171,7 @@ class Game2048 {
   private initUi() {
     const width = this.uiConfig.perBoxSize * 4 + this.uiConfig.gap * 5;
     this.container.css("width", width)
-    
+    console.log('初始化编译')
     const uiPanel = $(`
     <div class="uiPanel" style="position:relative;display:inline-block;
     width:100%;
@@ -204,4 +204,5 @@ class Game2048 {
   private newGame() {
 
   }
+  private newTabNav() {}
 }

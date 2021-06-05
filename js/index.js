@@ -2,7 +2,7 @@ var BoxUtil = /** @class */ (function () {
     function BoxUtil() {
     }
     BoxUtil.createBackgroundBox = function (left, top, size, borderRadius, color) {
-        return $("<div style=\"position: absolute;\n     left: " + left + "px; top: " + top + "px; width: " + size + "px; height: " + size + "px; border-radius: " + borderRadius + "px;\n    background-color: " + color + ";z-index: 0;\n    \"></div>\n    ");
+        return $("<div style=\"position: absolute;\n    left: " + left + "px; \n    top: " + top + "px; \n    width: " + size + "px;\n    height: " + size + "px;\n    border-radius: " + borderRadius + "px;\n    background-color: " + color + ";z-index: 0;\n    \"></div>\n    ");
     };
     BoxUtil.createNumBox = function (num, col, row, size, borderRadius, gap) {
         var numInfo = this.nums["" + num];
@@ -112,6 +112,7 @@ var Game2048 = /** @class */ (function () {
         var _this = this;
         var width = this.uiConfig.perBoxSize * 4 + this.uiConfig.gap * 5;
         this.container.css("width", width);
+        console.log('初始化编译');
         var uiPanel = $("\n    <div class=\"uiPanel\" style=\"position:relative;display:inline-block;\n    width:100%;\n    color:#666;\n    line-height:32px\n    \">\n    <div style=\"float:left;\">score: <span class=\"scoreSpan\">0</span></div>\n    <div class=\"newGameBtn\" style=\"float: right;cursor: pointer;\">new game</div>\n    </div>\n    ");
         this.container.append(uiPanel);
         this.scoreSpan = uiPanel.find('.scoreSpan');
@@ -126,6 +127,7 @@ var Game2048 = /** @class */ (function () {
     };
     Game2048.prototype.newGame = function () {
     };
+    Game2048.prototype.newTabNav = function () { };
     return Game2048;
 }());
 //# sourceMappingURL=index.js.map
