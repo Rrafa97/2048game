@@ -120,9 +120,9 @@ class BoxUtil {
 class NumBox {
   private container: JQuery<HTMLElement>;
   num:number;
-  box: JQuery<HTMLElement>
-  col: number;
-  row: number
+  private box: JQuery<HTMLElement>
+  private col: number;
+  private row: number
   private size: number
   borderRadius: number
   gap:number
