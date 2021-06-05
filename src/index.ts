@@ -7,24 +7,139 @@ type UiConfig = {
 }
 
 class BoxUtil {
-  static createBackgroundBox(
-    left: number,
-    top: number,
-    size: number,
-    borderRadius: number,
-    color: string
-  ) {
-    return $(`
-    <div style="position: absolute;
-    left: ${left}px;
-    top: ${top}px;
+  private static nums = {
+    "2": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 65
+    },
+    "4": {
+      "color": "#776fe5",
+      "backgroundColor": "#ede08c",
+      "fontSize": 65
+    },
+    "8": {
+      "color": "#f9f6f2",
+      "backgroundColor": "#f2b179",
+      "fontSize": 55
+    },
+    "16": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 65
+    },
+    "32": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 65
+    },
+    "64": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 40
+    },
+    "128": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 40
+    },
+    "256": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 40
+    },
+    "512": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 40
+    },
+    "1024": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 35
+    },
+    "2048": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 35
+    },
+    "4096": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 35
+    },
+    "8192": {
+      "color": "#776e65",
+      "backgroundColor": "#eee4da",
+      "fontSize": 35
+    },
+  }
+
+
+  static createBackgroundBox( left: number, top: number, size: number, 
+    borderRadius: number, color: string ) {
+    return $(`<div style="position: absolute;
+    left: ${left}px; 
+    top: ${top}px; 
     width: ${size}px;
     height: ${size}px;
     border-radius: ${borderRadius}px;
-    background-color: ${color};
-    z-index: 0;
+    background-color: ${color};z-index: 0;
     "></div>
     `)
+  }
+
+  static createNumBox(
+    num: number,
+    col: number,
+    row: number,
+    size: number,
+    borderRadius: number,
+    gap: number
+  ) {
+    const numInfo = this.nums["" + num]
+    return $(`
+    <div class="numBox" style="
+    position: absolute;
+    left: ${gap +(gap + size) * col}px;
+    top: ${gap + (gap + size) * row}px;
+    width: ${size}px;
+    height: ${size}px;
+    border-radius: ${borderRadius}px;
+    color: ${numInfo.color};
+    font-size: ${numInfo.fontSize};
+    line-height: ${size};
+    text-align: center;
+    background-color: ${numInfo.backgroundColor};
+    z-index: 1;
+    "></div>
+    `)
+  }
+}
+
+class NumBox {
+  private container: JQuery<HTMLElement>;
+  num:number;
+  box: JQuery<HTMLElement>
+  col: number;
+  row: number
+  private size: number
+  borderRadius: number
+  gap:number
+
+  // constructor
+  constructor(container: JQuery<HTMLElement>,num:number,col:number,row:number,size:number,borderRadius:number,gap:number) {
+    this.container = container
+    this.num = num
+    this.col = col
+    this.row = row
+    this.size = size
+    this.borderRadius = borderRadius
+    this.gap = gap
+  }
+
+  refresh() {
+
   }
 }
 
