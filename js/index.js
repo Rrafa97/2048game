@@ -188,6 +188,8 @@ class Game2048 {
         numBox.moveTo(3, 0);
     }
     newGame() {
+        this.mainPanel.find('.numBox').remove();
+        // this.numBoxes
     }
     newTabNav() { }
 }

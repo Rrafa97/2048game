@@ -226,7 +226,8 @@ class Game2048 {
 
 
   private newGame() {
-
+    this.mainPanel.find('.numBox').remove()
+    // this.numBoxes
   }
   private newTabNav() { }
 }
