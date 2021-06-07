@@ -10,7 +10,7 @@ class BoxUtil {
   private static nums = {
     "2": {
       "color": "#776e65",
-      "backgroundColor": "#eee4da",
+      "backgroundColor": "#eff4da",
       "fontSize": 65
     },
     "4": {
@@ -76,8 +76,8 @@ class BoxUtil {
   }
 
 
-  static createBackgroundBox( left: number, top: number, size: number, 
-    borderRadius: number, color: string ) {
+  static createBackgroundBox(left: number, top: number, size: number,
+    borderRadius: number, color: string) {
     return $(`<div style="position: absolute;
     left: ${left}px; 
     top: ${top}px; 
@@ -101,34 +101,34 @@ class BoxUtil {
     return $(`
     <div class="numBox" style="
     position: absolute;
-    left: ${gap +(gap + size) * col}px;
+    left: ${gap + (gap + size) * col}px;
     top: ${gap + (gap + size) * row}px;
     width: ${size}px;
     height: ${size}px;
     border-radius: ${borderRadius}px;
     color: ${numInfo.color};
-    font-size: ${numInfo.fontSize};
-    line-height: ${size};
+    font-size: ${numInfo.fontSize}px;
+    line-height: ${size}px;
     text-align: center;
     background-color: ${numInfo.backgroundColor};
     z-index: 1;
-    "></div>
+    ">${num}</div>
     `)
   }
 }
 
 class NumBox {
   private container: JQuery<HTMLElement>;
-  num:number;
-  private box: JQuery<HTMLElement>
-  private col: number;
-  private row: number
+  num: number;
+  box: JQuery<HTMLElement>
+  col: number;
+  row: number
   private size: number
-  borderRadius: number
-  gap:number
+  private borderRadius: number
+  private gap: number
 
   // constructor
-  constructor(container: JQuery<HTMLElement>,num:number,col:number,row:number,size:number,borderRadius:number,gap:number) {
+  constructor(container: JQuery<HTMLElement>, num: number, col: number, row: number, size: number, borderRadius: number, gap: number) {
     this.container = container
     this.num = num
     this.col = col
@@ -136,10 +136,31 @@ class NumBox {
     this.size = size
     this.borderRadius = borderRadius
     this.gap = gap
+    this.refresh()
   }
 
   refresh() {
+    if(this.box) {
+      this.box.remove()
+    }
+    this.box = BoxUtil.createNumBox(this.num,this.col,this.row,this.size, this.borderRadius,this.gap);
+    this.box.appendTo(this.container)
+  }
 
+  async moveTo (newCol: number,newRow:number) {
+    const hMovDis = (newCol - this.col) * (this.size + this.gap)
+    const vMovDis = (newRow - this.row) * (this.size + this.gap)
+    if(hMovDis + vMovDis !== 0) {
+      this.col = newCol
+      this.row = newRow
+      return new Promise<void>( resolve => {
+        const moveTime = (Math.abs(hMovDis + vMovDis) / (this.size + this.gap)) * 80
+        this.box.animate({
+          left: (this.box[0].offsetLeft + hMovDis) + 'px',
+          top: (this.box[0].offsetTop + vMovDis) + 'px',
+        },moveTime, "easeInOutCubic")
+      })
+    }
   }
 }
 
@@ -195,14 +216,17 @@ class Game2048 {
     for (let i = 0; i < 16; i++) {
       this.mainPanel.append(BoxUtil.createBackgroundBox(
         (this.uiConfig.perBoxSize + this.uiConfig.gap) * (i % 4) + this.uiConfig.gap,
-        (this.uiConfig.perBoxSize + this.uiConfig.gap) * Math.floor(i / 4) + this.uiConfig.gap, 
-        this.uiConfig.perBoxSize,this.uiConfig.borderRadius, this.uiConfig.backgroundBoxColor))
+        (this.uiConfig.perBoxSize + this.uiConfig.gap) * Math.floor(i / 4) + this.uiConfig.gap,
+        this.uiConfig.perBoxSize, this.uiConfig.borderRadius, this.uiConfig.backgroundBoxColor))
     }
+
+    const numBox =  new NumBox(this.mainPanel,2,0,0,this.uiConfig.perBoxSize,this.uiConfig.borderRadius,this.uiConfig.gap)
+    numBox.moveTo(3,0)
   }
 
 
   private newGame() {
 
   }
-  private newTabNav() {}
+  private newTabNav() { }
 }
