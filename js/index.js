@@ -42,16 +42,16 @@ class BoxUtil {
 BoxUtil.nums = {
     "2": {
         "color": "#776e65",
-        "backgroundColor": "#eff4da",
+        "backgroundColor": "rgb(251, 238, 226)",
         "fontSize": 65
     },
     "4": {
-        "color": "#776fe5",
-        "backgroundColor": "#ede08c",
+        "color": "#776e65",
+        "backgroundColor": "rgb(249, 233, 205)",
         "fontSize": 65
     },
     "8": {
-        "color": "#f9f6f2",
+        "color": "#776e65",
         "backgroundColor": "#f2b179",
         "fontSize": 55
     },
@@ -134,12 +134,27 @@ class NumBox {
                 this.row = newRow;
                 return new Promise(resolve => {
                     const moveTime = (Math.abs(hMovDis + vMovDis) / (this.size + this.gap)) * 80;
-                    this.box.animate({
-                        left: (this.box[0].offsetLeft + hMovDis) + 'px',
-                        top: (this.box[0].offsetTop + vMovDis) + 'px',
-                    }, moveTime, "easeInOutCubic");
+                    this.box.animate({ left: (this.box[0].offsetLeft + hMovDis) + 'px', top: (this.box[0].offsetTop + vMovDis) + 'px', }, moveTime, "easeInOutCubic");
+                    resolve();
                 });
             }
+        });
+    }
+    destory() {
+        this.box.fadeOut(() => {
+            this.box.remove();
+        });
+    }
+    mergeTo(otherBox) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.box.css('z-index', 2);
+            console.log(1, otherBox);
+            yield this.moveTo(otherBox.col, otherBox.row);
+            console.log(2, otherBox);
+            // console.log
+            otherBox.num = 4;
+            otherBox.refresh();
+            this.destory();
         });
     }
 }
@@ -148,15 +163,18 @@ class Game2048 {
         perBoxSize: 100,
         gap: 4,
         borderRadius: 4,
-        backgroundColor: "#000000",
-        backgroundBoxColor: "rgba(238,228,218,1)"
+        backgroundColor: "rgb(183, 160, 145)",
+        backgroundBoxColor: "rgb(212, 196, 183)"
     }) {
+        this.numBoxes = new Array(16).fill(null);
+        this.isGameOver = false;
         this.container = $(container);
         if (!this.container.length) {
             throw new Error(`container(${container}) err`);
         }
         this.uiConfig = config;
         this.initUi();
+        this.newGame();
     }
     initUi() {
         const width = this.uiConfig.perBoxSize * 4 + this.uiConfig.gap * 5;
@@ -184,13 +202,98 @@ class Game2048 {
         for (let i = 0; i < 16; i++) {
             this.mainPanel.append(BoxUtil.createBackgroundBox((this.uiConfig.perBoxSize + this.uiConfig.gap) * (i % 4) + this.uiConfig.gap, (this.uiConfig.perBoxSize + this.uiConfig.gap) * Math.floor(i / 4) + this.uiConfig.gap, this.uiConfig.perBoxSize, this.uiConfig.borderRadius, this.uiConfig.backgroundBoxColor));
         }
-        const numBox = new NumBox(this.mainPanel, 2, 0, 0, this.uiConfig.perBoxSize, this.uiConfig.borderRadius, this.uiConfig.gap);
-        numBox.moveTo(3, 0);
+        // const numBox =  new NumBox(this.mainPanel,2,0,0,this.uiConfig.perBoxSize,this.uiConfig.borderRadius,this.uiConfig.gap)
+        // // numBox.moveTo(3,0)
+        // const numBox1 =  new NumBox(this.mainPanel,2,0,2,this.uiConfig.perBoxSize,this.uiConfig.borderRadius,this.uiConfig.gap)
+        // numBox1.mergeTo(numBox)
     }
     newGame() {
         this.mainPanel.find('.numBox').remove();
-        // this.numBoxes
+        this.numBoxes.fill(null);
+        this.score = 0;
+        this.isGameOver = false;
+        this.addNewNumBox(2);
     }
-    newTabNav() { }
+    addNewNumBox(size) {
+        const emptyPosArr = this.getRandomEmptyGrids(size);
+        for (let index of emptyPosArr) {
+            const num = Math.random() < 0.8 ? 2 : 4;
+            this.numBoxes[index] = new NumBox(this.mainPanel, num, index % 4, Math.floor(index / 4), this.uiConfig.perBoxSize, this.uiConfig.borderRadius, this.uiConfig.gap);
+            this.score += num;
+        }
+        this.scoreSpan.text("" + this.score);
+    }
+    getRandomEmptyGrids(size) {
+        const emptyPosArr = [];
+        this.numBoxes.forEach((item, index) => {
+            if (!item) {
+                emptyPosArr.push(index);
+            }
+        });
+        const res = [];
+        while (res.length < size && emptyPosArr.length > 0) {
+            let randomI = Math.floor(Math.random() * emptyPosArr.length);
+            res.push(emptyPosArr.splice(randomI, 1)[0]);
+        }
+        return res;
+    }
+    merge(startIndexes, nextDelta) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let addNew = false;
+            const promise = [];
+            for (let startIndex of startIndexes) {
+                for (let i = 1; i < 4; i++) {
+                    const curIndex = startIndex + i * nextDelta;
+                    const curBox = this.numBoxes[curIndex];
+                    if (curBox) {
+                        const reachableBox = this.findReachableBox(curIndex, -nextDelta, startIndex);
+                        if (reachableBox !== null) {
+                            addNew = true;
+                            if (reachableBox.box) {
+                                this.numBoxes[curIndex] == null;
+                                reachableBox.box.isMerged = true;
+                                promise.push(curBox.mergeTo(reachableBox.box));
+                            }
+                            else {
+                                this.numBoxes[curIndex] = null;
+                                this.numBoxes[reachableBox.index] = curBox;
+                                promise.push(curBox.moveTo(reachableBox.index % 4, Math.floor(reachableBox.index / 4)));
+                            }
+                        }
+                    }
+                }
+            }
+            yield Promise.all(promise);
+            if (addNew) {
+                this.addNewNumBox(1);
+            }
+        });
+    }
+    findReachableBox(curIndex, nextDelta, endIndex) {
+        let reachableInfo = null;
+        const curNumBox = this.numBoxes[curIndex];
+        for (let i = 1; i <= 3; i++) {
+            let otherIndex = curIndex + nextDelta * i;
+            const otherBox = this.numBoxes[otherIndex];
+            if (!otherBox) {
+                reachableInfo = {
+                    index: otherIndex,
+                    box: null
+                };
+            }
+            else if (!otherBox.isMerged && curNumBox.num === otherBox.num) {
+                reachableInfo = {
+                    index: otherIndex,
+                    box: otherBox
+                };
+            }
+            else {
+                break;
+            }
+        }
+        return reachableInfo;
+    }
+    newTabNav() {
+    }
 }
 //# sourceMappingURL=index.js.map

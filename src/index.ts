@@ -10,16 +10,16 @@ class BoxUtil {
   private static nums = {
     "2": {
       "color": "#776e65",
-      "backgroundColor": "#eff4da",
+      "backgroundColor": "rgb(251, 238, 226)",
       "fontSize": 65
     },
     "4": {
-      "color": "#776fe5",
-      "backgroundColor": "#ede08c",
+      "color": "#776e65",
+      "backgroundColor": "rgb(249, 233, 205)",
       "fontSize": 65
     },
     "8": {
-      "color": "#f9f6f2",
+      "color": "#776e65",
       "backgroundColor": "#f2b179",
       "fontSize": 55
     },
@@ -126,6 +126,8 @@ class NumBox {
   private size: number
   private borderRadius: number
   private gap: number
+  isMerged: boolean
+
 
   // constructor
   constructor(container: JQuery<HTMLElement>, num: number, col: number, row: number, size: number, borderRadius: number, gap: number) {
@@ -155,12 +157,27 @@ class NumBox {
       this.row = newRow
       return new Promise<void>( resolve => {
         const moveTime = (Math.abs(hMovDis + vMovDis) / (this.size + this.gap)) * 80
-        this.box.animate({
-          left: (this.box[0].offsetLeft + hMovDis) + 'px',
-          top: (this.box[0].offsetTop + vMovDis) + 'px',
-        },moveTime, "easeInOutCubic")
+        this.box.animate({left: (this.box[0].offsetLeft + hMovDis) + 'px', top: (this.box[0].offsetTop + vMovDis) + 'px', },moveTime, "easeInOutCubic")
+        resolve()
       })
     }
+  }
+
+  private destory() {
+    this.box.fadeOut( ()=> {
+      this.box.remove()
+    })
+  }
+
+  async mergeTo(otherBox:NumBox) {
+    this.box.css('z-index',2);
+    console.log(1,otherBox)
+    await this.moveTo(otherBox.col,otherBox.row)
+    console.log(2,otherBox)
+    // console.log
+    otherBox.num = 4
+    otherBox.refresh()
+    this.destory()
   }
 }
 
@@ -170,13 +187,16 @@ class Game2048 {
   private container: JQuery<HTMLElement>
   private scoreSpan: JQuery<HTMLElement>
   private mainPanel: JQuery<HTMLElement>
+  private numBoxes: NumBox[] = new Array(16).fill(null)
+  private score:number
+  private isGameOver: boolean = false
 
   constructor(container: string, config: UiConfig = {
     perBoxSize: 100,
     gap: 4,
     borderRadius: 4,
-    backgroundColor: "#000000",
-    backgroundBoxColor: "rgba(238,228,218,1)"
+    backgroundColor: "rgb(183, 160, 145)",
+    backgroundBoxColor: "rgb(212, 196, 183)"
   }) {
 
     this.container = $(container)
@@ -187,6 +207,7 @@ class Game2048 {
 
     this.uiConfig = config
     this.initUi()
+    this.newGame()
   }
 
   private initUi() {
@@ -220,14 +241,109 @@ class Game2048 {
         this.uiConfig.perBoxSize, this.uiConfig.borderRadius, this.uiConfig.backgroundBoxColor))
     }
 
-    const numBox =  new NumBox(this.mainPanel,2,0,0,this.uiConfig.perBoxSize,this.uiConfig.borderRadius,this.uiConfig.gap)
-    numBox.moveTo(3,0)
+    // const numBox =  new NumBox(this.mainPanel,2,0,0,this.uiConfig.perBoxSize,this.uiConfig.borderRadius,this.uiConfig.gap)
+    // // numBox.moveTo(3,0)
+    // const numBox1 =  new NumBox(this.mainPanel,2,0,2,this.uiConfig.perBoxSize,this.uiConfig.borderRadius,this.uiConfig.gap)
+    // numBox1.mergeTo(numBox)
   }
 
+  private
 
   private newGame() {
     this.mainPanel.find('.numBox').remove()
-    // this.numBoxes
+    this.numBoxes.fill(null)
+    this.score = 0
+    this.isGameOver = false
+
+    this.addNewNumBox(2)
   }
-  private newTabNav() { }
+
+  private addNewNumBox(size:number) {
+    const emptyPosArr = this.getRandomEmptyGrids(size)
+    for(let index of emptyPosArr) {
+      const num = Math.random() <0.8 ? 2 : 4;
+      this.numBoxes[index] = new NumBox(this.mainPanel,num,index%4,Math.floor(index/4),this.uiConfig.perBoxSize,
+      this.uiConfig.borderRadius,this.uiConfig.gap)
+      this.score += num
+    }
+    this.scoreSpan.text( "" + this.score)
+  }
+
+  private getRandomEmptyGrids(size:number):Array<number> {
+    const emptyPosArr = []
+    this.numBoxes.forEach((item,index) => {
+      if(!item) {
+        emptyPosArr.push(index)
+      }
+    })
+
+    const res = []
+    while(res.length < size && emptyPosArr.length > 0) {
+      let randomI = Math.floor(Math.random() * emptyPosArr.length)
+      res.push(emptyPosArr.splice(randomI,1)[0])
+    }
+    return res
+  }
+
+  private async merge(startIndexes: number[],nextDelta: number) {
+
+    let addNew = false
+    const promise = []
+
+    for(let startIndex of startIndexes) {
+      for(let i = 1;i<4;i++) {
+        const curIndex = startIndex + i*nextDelta
+        const curBox = this.numBoxes[curIndex]
+        if(curBox) {
+          const reachableBox = this.findReachableBox(curIndex,-nextDelta,startIndex) 
+          if( reachableBox !== null) {
+            addNew = true
+            if(reachableBox.box) {
+              this.numBoxes[curIndex] == null
+              reachableBox.box.isMerged = true
+              promise.push(curBox.mergeTo(reachableBox.box))
+            } else {
+              this.numBoxes[curIndex] = null
+              this.numBoxes[reachableBox.index] = curBox
+              promise.push(curBox.moveTo(reachableBox.index%4,Math.floor(reachableBox.index/4)))
+            }
+
+          }
+        }
+      }
+    }
+
+    await Promise.all(promise)
+    if(addNew) {
+      this.addNewNumBox(1)
+
+    }
+  }
+
+  private findReachableBox(curIndex: number,nextDelta:number,endIndex:number) {
+    let reachableInfo = null
+    const curNumBox = this.numBoxes[curIndex]
+    for(let i = 1;i<=3;i++) {
+      let otherIndex = curIndex + nextDelta *i
+      const otherBox = this.numBoxes[otherIndex]
+      if(!otherBox) {
+        reachableInfo = {
+          index: otherIndex,
+          box: null
+        }
+      } else if(!otherBox.isMerged &&  curNumBox.num === otherBox.num) {
+        reachableInfo = {
+          index: otherIndex,
+          box: otherBox
+        }
+      } else {
+        break
+      }
+    }
+    return reachableInfo
+  }
+
+  private newTabNav() {
+    
+   }
 }
