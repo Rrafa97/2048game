@@ -171,11 +171,9 @@ class NumBox {
 
   async mergeTo(otherBox:NumBox) {
     this.box.css('z-index',2);
-    console.log(1,otherBox)
     await this.moveTo(otherBox.col,otherBox.row)
-    console.log(2,otherBox)
     // console.log
-    otherBox.num = 4
+    otherBox.num *= 2
     otherBox.refresh()
     this.destory()
   }
@@ -190,6 +188,7 @@ class Game2048 {
   private numBoxes: NumBox[] = new Array(16).fill(null)
   private score:number
   private isGameOver: boolean = false
+  private isMerging: boolean =false
 
   constructor(container: string, config: UiConfig = {
     perBoxSize: 100,
@@ -208,6 +207,7 @@ class Game2048 {
     this.uiConfig = config
     this.initUi()
     this.newGame()
+    this.bindKeys()
   }
 
   private initUi() {
@@ -247,13 +247,82 @@ class Game2048 {
     // numBox1.mergeTo(numBox)
   }
 
-  private
+  private bindKeys () {
+    document.addEventListener('keyup',event => {
+      switch(event.code) {
+          case "ArrowLeft":
+          this.leftMerge()
+          break;
+          case "ArrowRight":
+          this.rightMerge()
+          break;
+          case "ArrowUp":
+          this.upMerge()
+          break;
+          case "ArrowDown":
+          this.downMerge()
+          break; 
+      }
+
+    })
+    interface TouchEvent__ {
+      changedTouches: Object
+    }
+    let pointStartX: number
+    let pointStartY: number
+    let pointEndX: number
+    let pointEndY: number
+    document.addEventListener('touchstart',(event:any) => {
+      pointStartX = event.changedTouches[0].clientX
+      pointStartY = event.changedTouches[0].clientY
+    })
+    document.addEventListener('touchend',(event:any) => {
+      pointEndX = event.changedTouches[0].clientX
+      pointEndY = event.changedTouches[0].clientY
+      // if(pointStartX - pointEndX) {
+
+      // }
+      let axisXDistance = pointStartX - pointEndX
+      let axisYDistance = pointStartY - pointEndY
+      let switchEvt: number
+      if(Math.abs(axisXDistance) - Math.abs(axisYDistance) > 20) {
+        if(axisXDistance<0) {
+          switchEvt = 1
+        } else {
+          switchEvt = 0
+        }
+      } else if(Math.abs(axisYDistance) - Math.abs(axisXDistance) > 20){
+
+        if(axisYDistance<0) {
+          switchEvt = 3
+        } else {
+          switchEvt = 2
+        }
+      }
+      switch (switchEvt) {
+        case 0:
+          this.leftMerge()
+          break;
+          case 1:
+          this.rightMerge()
+          break;
+          case 2:
+          this.upMerge()
+          break;
+          case 3:
+          this.downMerge()
+          break; 
+      }
+    })
+
+  }
 
   private newGame() {
     this.mainPanel.find('.numBox').remove()
     this.numBoxes.fill(null)
     this.score = 0
     this.isGameOver = false
+    this.isMerging = false
 
     this.addNewNumBox(2)
   }
@@ -285,10 +354,33 @@ class Game2048 {
     return res
   }
 
+
+  private leftMerge() {
+    return this.merge([0,4,8,12],1)
+  }
+
+  private rightMerge() {
+    return this.merge([3,7,11,15],-1)
+  }
+  
+  private upMerge() {
+    return this.merge([0,1,2,3],4)
+  }
+
+  private downMerge() {
+    return this.merge([12,13,14,15],-4)
+  }
+
   private async merge(startIndexes: number[],nextDelta: number) {
+    if(this.isGameOver || this.isMerging) {
+      return
+    }
+    this.isMerging = true
 
     let addNew = false
     const promise = []
+
+    this.numBoxes.forEach(item => item && (item.isMerged = false))
 
     for(let startIndex of startIndexes) {
       for(let i = 1;i<4;i++) {
@@ -318,6 +410,7 @@ class Game2048 {
       this.addNewNumBox(1)
 
     }
+    this.isMerging = false
   }
 
   private findReachableBox(curIndex: number,nextDelta:number,endIndex:number) {
@@ -337,6 +430,10 @@ class Game2048 {
           box: otherBox
         }
       } else {
+        break
+      }
+
+      if(otherIndex === endIndex) {
         break
       }
     }
