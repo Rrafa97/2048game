@@ -20,17 +20,17 @@ class BoxUtil {
     },
     "8": {
       "color": "#776e65",
-      "backgroundColor": "#f2b179",
+      "backgroundColor": "rgb(251, 153, 104)",
       "fontSize": 55
     },
     "16": {
       "color": "#776e65",
-      "backgroundColor": "#eee4da",
+      "backgroundColor": "rgb(234, 137, 88)",
       "fontSize": 65
     },
     "32": {
       "color": "#776e65",
-      "backgroundColor": "#eee4da",
+      "backgroundColor": "rgb(228, 104, 40)",
       "fontSize": 65
     },
     "64": {
