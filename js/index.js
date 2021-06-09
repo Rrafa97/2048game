@@ -40,7 +40,7 @@ class BoxUtil {
     }
 }
 BoxUtil.nums = {
-    "2": {
+    "3": {
         "color": "#776e65",
         "backgroundColor": "rgb(251, 238, 226)",
         "fontSize": 48
