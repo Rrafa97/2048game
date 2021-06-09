@@ -11,47 +11,47 @@ class BoxUtil {
     "2": {
       "color": "#776e65",
       "backgroundColor": "rgb(251, 238, 226)",
-      "fontSize": 65
+      "fontSize": 48
     },
     "4": {
       "color": "#776e65",
       "backgroundColor": "rgb(249, 233, 205)",
-      "fontSize": 65
+      "fontSize": 48
     },
     "8": {
       "color": "#776e65",
       "backgroundColor": "rgb(251, 153, 104)",
-      "fontSize": 55
+      "fontSize": 42
     },
     "16": {
       "color": "#776e65",
       "backgroundColor": "rgb(234, 137, 88)",
-      "fontSize": 65
+      "fontSize": 42
     },
     "32": {
       "color": "#776e65",
       "backgroundColor": "rgb(228, 104, 40)",
-      "fontSize": 65
+      "fontSize": 42
     },
     "64": {
       "color": "#776e65",
       "backgroundColor": "#eee4da",
-      "fontSize": 40
+      "fontSize": 38
     },
     "128": {
       "color": "#776e65",
       "backgroundColor": "#eee4da",
-      "fontSize": 40
+      "fontSize": 38
     },
     "256": {
       "color": "#776e65",
       "backgroundColor": "#eee4da",
-      "fontSize": 40
+      "fontSize": 38
     },
     "512": {
       "color": "#776e65",
       "backgroundColor": "#eee4da",
-      "fontSize": 40
+      "fontSize": 38
     },
     "1024": {
       "color": "#776e65",
@@ -142,36 +142,36 @@ class NumBox {
   }
 
   refresh() {
-    if(this.box) {
+    if (this.box) {
       this.box.remove()
     }
-    this.box = BoxUtil.createNumBox(this.num,this.col,this.row,this.size, this.borderRadius,this.gap);
+    this.box = BoxUtil.createNumBox(this.num, this.col, this.row, this.size, this.borderRadius, this.gap);
     this.box.appendTo(this.container)
   }
 
-  async moveTo (newCol: number,newRow:number) {
+  async moveTo(newCol: number, newRow: number) {
     const hMovDis = (newCol - this.col) * (this.size + this.gap)
     const vMovDis = (newRow - this.row) * (this.size + this.gap)
-    if(hMovDis + vMovDis !== 0) {
+    if (hMovDis + vMovDis !== 0) {
       this.col = newCol
       this.row = newRow
-      return new Promise<void>( resolve => {
+      return new Promise<void>(resolve => {
         const moveTime = (Math.abs(hMovDis + vMovDis) / (this.size + this.gap)) * 80
-        this.box.animate({left: (this.box[0].offsetLeft + hMovDis) + 'px', top: (this.box[0].offsetTop + vMovDis) + 'px', },moveTime, "easeInOutCubic")
+        this.box.animate({ left: (this.box[0].offsetLeft + hMovDis) + 'px', top: (this.box[0].offsetTop + vMovDis) + 'px', }, moveTime, "easeInOutCubic")
         resolve()
       })
     }
   }
 
   private destory() {
-    this.box.fadeOut( ()=> {
+    this.box.fadeOut(() => {
       this.box.remove()
     })
   }
 
-  async mergeTo(otherBox:NumBox) {
-    this.box.css('z-index',2);
-    await this.moveTo(otherBox.col,otherBox.row)
+  async mergeTo(otherBox: NumBox) {
+    this.box.css('z-index', 2);
+    await this.moveTo(otherBox.col, otherBox.row)
     // console.log
     otherBox.num *= 2
     otherBox.refresh()
@@ -186,12 +186,12 @@ class Game2048 {
   private scoreSpan: JQuery<HTMLElement>
   private mainPanel: JQuery<HTMLElement>
   private numBoxes: NumBox[] = new Array(16).fill(null)
-  private score:number
+  private score: number
   private isGameOver: boolean = false
-  private isMerging: boolean =false
+  private isMerging: boolean = false
 
   constructor(container: string, config: UiConfig = {
-    perBoxSize: 100,
+    perBoxSize: 60,
     gap: 4,
     borderRadius: 4,
     backgroundColor: "rgb(183, 160, 145)",
@@ -247,21 +247,21 @@ class Game2048 {
     // numBox1.mergeTo(numBox)
   }
 
-  private bindKeys () {
-    document.addEventListener('keyup',event => {
-      switch(event.code) {
-          case "ArrowLeft":
+  private bindKeys() {
+    document.addEventListener('keyup', event => {
+      switch (event.code) {
+        case "ArrowLeft":
           this.leftMerge()
           break;
-          case "ArrowRight":
+        case "ArrowRight":
           this.rightMerge()
           break;
-          case "ArrowUp":
+        case "ArrowUp":
           this.upMerge()
           break;
-          case "ArrowDown":
+        case "ArrowDown":
           this.downMerge()
-          break; 
+          break;
       }
 
     })
@@ -272,11 +272,11 @@ class Game2048 {
     let pointStartY: number
     let pointEndX: number
     let pointEndY: number
-    document.addEventListener('touchstart',(event:any) => {
+    document.addEventListener('touchstart', (event: any) => {
       pointStartX = event.changedTouches[0].clientX
       pointStartY = event.changedTouches[0].clientY
     })
-    document.addEventListener('touchend',(event:any) => {
+    document.addEventListener('touchend', (event: any) => {
       pointEndX = event.changedTouches[0].clientX
       pointEndY = event.changedTouches[0].clientY
       // if(pointStartX - pointEndX) {
@@ -285,15 +285,15 @@ class Game2048 {
       let axisXDistance = pointStartX - pointEndX
       let axisYDistance = pointStartY - pointEndY
       let switchEvt: number
-      if(Math.abs(axisXDistance) - Math.abs(axisYDistance) > 20) {
-        if(axisXDistance<0) {
+      if (Math.abs(axisXDistance) - Math.abs(axisYDistance) > 20) {
+        if (axisXDistance < 0) {
           switchEvt = 1
         } else {
           switchEvt = 0
         }
-      } else if(Math.abs(axisYDistance) - Math.abs(axisXDistance) > 20){
+      } else if (Math.abs(axisYDistance) - Math.abs(axisXDistance) > 20) {
 
-        if(axisYDistance<0) {
+        if (axisYDistance < 0) {
           switchEvt = 3
         } else {
           switchEvt = 2
@@ -303,15 +303,15 @@ class Game2048 {
         case 0:
           this.leftMerge()
           break;
-          case 1:
+        case 1:
           this.rightMerge()
           break;
-          case 2:
+        case 2:
           this.upMerge()
           break;
-          case 3:
+        case 3:
           this.downMerge()
-          break; 
+          break;
       }
     })
 
@@ -327,77 +327,77 @@ class Game2048 {
     this.addNewNumBox(2)
   }
 
-  private addNewNumBox(size:number) {
+  private addNewNumBox(size: number) {
     const emptyPosArr = this.getRandomEmptyGrids(size)
-    for(let index of emptyPosArr) {
-      const num = Math.random() <0.8 ? 2 : 4;
-      this.numBoxes[index] = new NumBox(this.mainPanel,num,index%4,Math.floor(index/4),this.uiConfig.perBoxSize,
-      this.uiConfig.borderRadius,this.uiConfig.gap)
+    for (let index of emptyPosArr) {
+      const num = Math.random() < 0.8 ? 2 : 4;
+      this.numBoxes[index] = new NumBox(this.mainPanel, num, index % 4, Math.floor(index / 4), this.uiConfig.perBoxSize,
+        this.uiConfig.borderRadius, this.uiConfig.gap)
       this.score += num
     }
-    this.scoreSpan.text( "" + this.score)
+    this.scoreSpan.text("" + this.score)
   }
 
-  private getRandomEmptyGrids(size:number):Array<number> {
+  private getRandomEmptyGrids(size: number): Array<number> {
     const emptyPosArr = []
-    this.numBoxes.forEach((item,index) => {
-      if(!item) {
+    this.numBoxes.forEach((item, index) => {
+      if (!item) {
         emptyPosArr.push(index)
       }
     })
 
     const res = []
-    while(res.length < size && emptyPosArr.length > 0) {
+    while (res.length < size && emptyPosArr.length > 0) {
       let randomI = Math.floor(Math.random() * emptyPosArr.length)
-      res.push(emptyPosArr.splice(randomI,1)[0])
+      res.push(emptyPosArr.splice(randomI, 1)[0])
     }
     return res
   }
 
 
   private leftMerge() {
-    return this.merge([0,4,8,12],1)
+    return this.merge([0, 4, 8, 12], 1)
   }
 
   private rightMerge() {
-    return this.merge([3,7,11,15],-1)
+    return this.merge([3, 7, 11, 15], -1)
   }
-  
+
   private upMerge() {
-    return this.merge([0,1,2,3],4)
+    return this.merge([0, 1, 2, 3], 4)
   }
 
   private downMerge() {
-    return this.merge([12,13,14,15],-4)
+    return this.merge([12, 13, 14, 15], -4)
   }
 
-  private async merge(startIndexes: number[],nextDelta: number) {
-    if(this.isGameOver || this.isMerging) {
+  private async merge(startIndexes: number[], nextDelta: number) {
+    if (this.isGameOver || this.isMerging) {
       return
     }
     this.isMerging = true
 
     let addNew = false
-    const promise = []
+    const promises = []
 
     this.numBoxes.forEach(item => item && (item.isMerged = false))
 
-    for(let startIndex of startIndexes) {
-      for(let i = 1;i<4;i++) {
-        const curIndex = startIndex + i*nextDelta
+    for (let startIndex of startIndexes) {
+      for (let i = 1; i < 4; i++) {
+        const curIndex = startIndex + i * nextDelta
         const curBox = this.numBoxes[curIndex]
-        if(curBox) {
-          const reachableBox = this.findReachableBox(curIndex,-nextDelta,startIndex) 
-          if( reachableBox !== null) {
+        if (curBox) {
+          const reachableBox = this.findReachableBox(curIndex, -nextDelta, startIndex)
+          if (reachableBox) {
             addNew = true
-            if(reachableBox.box) {
-              this.numBoxes[curIndex] == null
+            if (reachableBox.box) {
+              this.numBoxes[curIndex] = null
               reachableBox.box.isMerged = true
-              promise.push(curBox.mergeTo(reachableBox.box))
+              promises.push(curBox.mergeTo(reachableBox.box))
             } else {
               this.numBoxes[curIndex] = null
               this.numBoxes[reachableBox.index] = curBox
-              promise.push(curBox.moveTo(reachableBox.index%4,Math.floor(reachableBox.index/4)))
+              promises.push(curBox.moveTo(reachableBox.index % 4, Math.floor(reachableBox.index / 4)))
             }
 
           }
@@ -405,26 +405,26 @@ class Game2048 {
       }
     }
 
-    await Promise.all(promise)
-    if(addNew) {
+    await Promise.all(promises)
+    if (addNew) {
       this.addNewNumBox(1)
 
     }
     this.isMerging = false
   }
 
-  private findReachableBox(curIndex: number,nextDelta:number,endIndex:number) {
+  private findReachableBox(curIndex: number, nextDelta: number, endIndex: number) {
     let reachableInfo = null
     const curNumBox = this.numBoxes[curIndex]
-    for(let i = 1;i<=3;i++) {
-      let otherIndex = curIndex + nextDelta *i
+    for (let i = 1; i < 4; i++) {
+      let otherIndex = curIndex + nextDelta * i
       const otherBox = this.numBoxes[otherIndex]
-      if(!otherBox) {
+      if (!otherBox) {
         reachableInfo = {
           index: otherIndex,
           box: null
         }
-      } else if(!otherBox.isMerged &&  curNumBox.num === otherBox.num) {
+      } else if (!otherBox.isMerged && curNumBox.num === otherBox.num) {
         reachableInfo = {
           index: otherIndex,
           box: otherBox
@@ -433,7 +433,7 @@ class Game2048 {
         break
       }
 
-      if(otherIndex === endIndex) {
+      if (otherIndex === endIndex) {
         break
       }
     }
@@ -441,6 +441,6 @@ class Game2048 {
   }
 
   private newTabNav() {
-    
-   }
+
+  }
 }

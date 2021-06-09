@@ -43,47 +43,47 @@ BoxUtil.nums = {
     "2": {
         "color": "#776e65",
         "backgroundColor": "rgb(251, 238, 226)",
-        "fontSize": 65
+        "fontSize": 48
     },
     "4": {
         "color": "#776e65",
         "backgroundColor": "rgb(249, 233, 205)",
-        "fontSize": 65
+        "fontSize": 48
     },
     "8": {
         "color": "#776e65",
         "backgroundColor": "rgb(251, 153, 104)",
-        "fontSize": 55
+        "fontSize": 42
     },
     "16": {
         "color": "#776e65",
         "backgroundColor": "rgb(234, 137, 88)",
-        "fontSize": 65
+        "fontSize": 42
     },
     "32": {
         "color": "#776e65",
         "backgroundColor": "rgb(228, 104, 40)",
-        "fontSize": 65
+        "fontSize": 42
     },
     "64": {
         "color": "#776e65",
         "backgroundColor": "#eee4da",
-        "fontSize": 40
+        "fontSize": 38
     },
     "128": {
         "color": "#776e65",
         "backgroundColor": "#eee4da",
-        "fontSize": 40
+        "fontSize": 38
     },
     "256": {
         "color": "#776e65",
         "backgroundColor": "#eee4da",
-        "fontSize": 40
+        "fontSize": 38
     },
     "512": {
         "color": "#776e65",
         "backgroundColor": "#eee4da",
-        "fontSize": 40
+        "fontSize": 38
     },
     "1024": {
         "color": "#776e65",
@@ -158,7 +158,7 @@ class NumBox {
 }
 class Game2048 {
     constructor(container, config = {
-        perBoxSize: 100,
+        perBoxSize: 60,
         gap: 4,
         borderRadius: 4,
         backgroundColor: "rgb(183, 160, 145)",
@@ -322,7 +322,7 @@ class Game2048 {
             }
             this.isMerging = true;
             let addNew = false;
-            const promise = [];
+            const promises = [];
             this.numBoxes.forEach(item => item && (item.isMerged = false));
             for (let startIndex of startIndexes) {
                 for (let i = 1; i < 4; i++) {
@@ -330,23 +330,23 @@ class Game2048 {
                     const curBox = this.numBoxes[curIndex];
                     if (curBox) {
                         const reachableBox = this.findReachableBox(curIndex, -nextDelta, startIndex);
-                        if (reachableBox !== null) {
+                        if (reachableBox) {
                             addNew = true;
                             if (reachableBox.box) {
-                                this.numBoxes[curIndex] == null;
+                                this.numBoxes[curIndex] = null;
                                 reachableBox.box.isMerged = true;
-                                promise.push(curBox.mergeTo(reachableBox.box));
+                                promises.push(curBox.mergeTo(reachableBox.box));
                             }
                             else {
                                 this.numBoxes[curIndex] = null;
                                 this.numBoxes[reachableBox.index] = curBox;
-                                promise.push(curBox.moveTo(reachableBox.index % 4, Math.floor(reachableBox.index / 4)));
+                                promises.push(curBox.moveTo(reachableBox.index % 4, Math.floor(reachableBox.index / 4)));
                             }
                         }
                     }
                 }
             }
-            yield Promise.all(promise);
+            yield Promise.all(promises);
             if (addNew) {
                 this.addNewNumBox(1);
             }
@@ -356,7 +356,7 @@ class Game2048 {
     findReachableBox(curIndex, nextDelta, endIndex) {
         let reachableInfo = null;
         const curNumBox = this.numBoxes[curIndex];
-        for (let i = 1; i <= 3; i++) {
+        for (let i = 1; i < 4; i++) {
             let otherIndex = curIndex + nextDelta * i;
             const otherBox = this.numBoxes[otherIndex];
             if (!otherBox) {
