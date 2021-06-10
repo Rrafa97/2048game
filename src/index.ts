@@ -1,3 +1,4 @@
+// ts类型定义
 type UiConfig = {
   perBoxSize: number,
   gap: number,
@@ -5,8 +6,9 @@ type UiConfig = {
   backgroundColor: string,
   backgroundBoxColor: string
 }
-
+// 盒子配置相关
 class BoxUtil {
+  // 数字配置包括数字颜色背景颜色和字号
   private static nums = {
     "3": {
       "color": "#776e65",
@@ -75,7 +77,15 @@ class BoxUtil {
     },
   }
 
-
+/**
+ * 
+ * @param left 左偏移
+ * @param top 上偏移
+ * @param size 盒子宽度
+ * @param borderRadius 盒子边框圆滑
+ * @param color 盒子背景颜色
+ * @returns 返回创建好后的盒子html
+ */
   static createBackgroundBox(left: number, top: number, size: number,
     borderRadius: number, color: string) {
     return $(`<div style="position: absolute;
@@ -89,6 +99,16 @@ class BoxUtil {
     `)
   }
 
+  /**
+   * 
+   * @param num 盒子数量
+   * @param col 列数
+   * @param row 行数
+   * @param size 大小
+   * @param borderRadius 盒子边框圆滑
+   * @param gap 盒子间隙
+   * @returns 
+   */
   static createNumBox(
     num: number,
     col: number,
@@ -117,6 +137,10 @@ class BoxUtil {
   }
 }
 
+
+/**
+ * 数字盒子
+ */
 class NumBox {
   private container: JQuery<HTMLElement>;
   num: number;
@@ -140,7 +164,7 @@ class NumBox {
     this.gap = gap
     this.refresh()
   }
-
+// 刷新重新绘制
   refresh() {
     if (this.box) {
       this.box.remove()
@@ -148,7 +172,7 @@ class NumBox {
     this.box = BoxUtil.createNumBox(this.num, this.col, this.row, this.size, this.borderRadius, this.gap);
     this.box.appendTo(this.container)
   }
-
+// 移动函数
   async moveTo(newCol: number, newRow: number) {
     const hMovDis = (newCol - this.col) * (this.size + this.gap)
     const vMovDis = (newRow - this.row) * (this.size + this.gap)
@@ -162,13 +186,14 @@ class NumBox {
       })
     }
   }
-
+// 移动后销毁不需要的盒子
   private destory() {
     this.box.fadeOut(() => {
       this.box.remove()
     })
   }
 
+  // 合并两个盒子
   async mergeTo(otherBox: NumBox) {
     this.box.css('z-index', 2);
     await this.moveTo(otherBox.col, otherBox.row)
@@ -179,6 +204,7 @@ class NumBox {
   }
 }
 
+// 主函数
 class Game2048 {
 
   private uiConfig: UiConfig
@@ -205,11 +231,12 @@ class Game2048 {
     }
 
     this.uiConfig = config
-    this.initUi()
-    this.newGame()
-    this.bindKeys()
+    this.initUi() //初始化
+    this.newGame() //新游戏
+    this.bindKeys() //绑定按键和滑动监听
   }
 
+  // 初始化函数，第一次进入游戏调用此函数将会绘制游戏盘
   private initUi() {
     const width = this.uiConfig.perBoxSize * 4 + this.uiConfig.gap * 5;
     this.container.css("width", width)
@@ -224,16 +251,17 @@ class Game2048 {
     <div class="newGameBtn" style="float: right;cursor: pointer;">new game</div>
     </div>
     `);
-    this.container.append(uiPanel)
-    this.scoreSpan = uiPanel.find('.scoreSpan')
-    uiPanel.find(".newGameBtn").on("click", event => this.newGame())
+    this.container.append(uiPanel) //将元素添加绑定到获取的元素
+    this.scoreSpan = uiPanel.find('.scoreSpan') // 绑定分数计算
+    uiPanel.find(".newGameBtn").on("click", event => this.newGame()) // 绑定按键按下新游戏时候重新开始游戏
     this.mainPanel = $(`
     <div class="mainPanel" style="position: relative;width: ${width}px; height: ${width}px;"></div>
-    `)
+    `) // 绘制主函数
     this.container.append(this.mainPanel)
 
     this.mainPanel.append(BoxUtil.createBackgroundBox(0, 0, width, this.uiConfig.borderRadius, this.uiConfig.backgroundColor))
     console.log('开始编译')
+    // 绘制盒子
     for (let i = 0; i < 16; i++) {
       this.mainPanel.append(BoxUtil.createBackgroundBox(
         (this.uiConfig.perBoxSize + this.uiConfig.gap) * (i % 4) + this.uiConfig.gap,
@@ -247,6 +275,7 @@ class Game2048 {
     // numBox1.mergeTo(numBox)
   }
 
+  // 绑定按键和滑动事件
   private bindKeys() {
     document.addEventListener('keyup', event => {
       switch (event.code) {
